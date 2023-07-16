@@ -4,7 +4,7 @@
 
 int main(){
 
-    cv::Mat img = cv::imread("../data/basement.png");
+    cv::Mat img = cv::imread("../data/base.pgm");
 
     cv::Mat gray;
     cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
@@ -19,7 +19,7 @@ int main(){
     cv::Mat open_kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5), cv::Point(-1,-1));
     cv::morphologyEx(img_, img_, cv::MORPH_OPEN, open_kernel);
 
-//    cv::imshow("preprocess", img_);
+   cv::imshow("preprocess", img_);
 
     std::vector<std::vector<cv::Point>> cnts;
     std::vector<cv::Vec4i> hierarchy; // index: next, prev, first_child, parent
@@ -42,14 +42,14 @@ int main(){
             cv::drawContours(cnt_canvas, cnts, i, cv::Scalar(255,0,0));
         }
     }
-//    cv::imshow("contours", cnt_canvas);
+   cv::imshow("contours", cnt_canvas);
 
     cv::Mat cnt_img = cv::Mat(img.rows, img.cols, CV_8UC3);
     cnt_img.setTo(255);
     for(int i = 0; i < contours.size(); i++){
         cv::drawContours(cnt_img, contours, i, cv::Scalar(0,0,0));
     }
-//    cv::imshow("only contours", cnt_img);
+   cv::imshow("only contours", cnt_img);
 
     cv::Mat poly_canvas = img.clone();
     std::vector<cv::Point> poly;
@@ -62,14 +62,14 @@ int main(){
     for(int i = 0; i < polys.size(); i++){
         cv::drawContours(poly_canvas, polys, i, cv::Scalar(255,0,255));
     }
-//    cv::imshow("polygons", poly_canvas);
+   cv::imshow("polygons", poly_canvas);
 
     cv::Mat poly_img = cv::Mat(img.rows, img.cols, CV_8UC3);
     poly_img.setTo(255);
     for(int i = 0; i < polys.size(); i++){
         cv::drawContours(poly_img, polys, i, cv::Scalar(0,0,0));
     }
-//    cv::imshow("only polygons", poly_img);
+   cv::imshow("only polygons", poly_img);
 
     // compute main direction
 
@@ -95,22 +95,21 @@ int main(){
 //        cv::waitKey();
     }
 
-//    cv::waitKey();
+   cv::waitKey(0);
+   return 0;
+   auto it = std::max_element(line_deg_histogram.begin(), line_deg_histogram.end());
+   int main_deg = (it - line_deg_histogram.begin());
+   std::cout << "main deg: " << main_deg << std::endl;
 
-    auto it = std::max_element(line_deg_histogram.begin(), line_deg_histogram.end());
-    int main_deg = (it-line_deg_histogram.begin());
-    std::cout<<"main deg: "<<main_deg<<std::endl;
+   // construct polygon with holes
 
+   std::vector<cv::Point> outer_poly = polys.front();
+   polys.erase(polys.begin());
+   std::vector<std::vector<cv::Point>> inner_polys = polys;
 
-    // construct polygon with holes
-
-    std::vector<cv::Point> outer_poly = polys.front();
-    polys.erase(polys.begin());
-    std::vector<std::vector<cv::Point>> inner_polys = polys;
-
-
-    Polygon_2 outer_polygon;
-    for(const auto& point : outer_poly){
+   Polygon_2 outer_polygon;
+   for (const auto &point : outer_poly)
+   {
         outer_polygon.push_back(Point_2(point.x, point.y));
     }
 
